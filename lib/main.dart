@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -135,7 +137,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trade Calculator'),
+       title: FittedBox(
+    fit: BoxFit.scaleDown, // Ensures text scales down if necessary
+    child: Text(
+      'Masha Allah Money Miner by Tamseel',
+      style: TextStyle(
+        fontSize: min(MediaQuery.of(context).size.width * 0.08, 40.0),
+        fontFamily: 'Times New Roman',
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+            shadows: [
+        Shadow(
+          offset: Offset(3.0, 3.0), // Shadow offset (horizontal, vertical)
+          blurRadius: 5.0, // Blur radius of the shadow
+          color: Colors.black.withOpacity(0.5), // Shadow color with opacity
+        ),
+      ],
+    
+      ),
+      softWrap: true, // Allows the text to wrap into the next line if it's too long
+      overflow: TextOverflow.visible, // No ellipsis at the end, text can break to the next line
+    ),
+  ),
         actions: [
           Switch(
             value: widget.isDarkMode,
