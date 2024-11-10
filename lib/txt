@@ -1,0 +1,341 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _isDarkMode = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Advanced Calculator',
+      theme: _isDarkMode
+          ? ThemeData.dark().copyWith(
+              colorScheme: const ColorScheme.dark(primary: Colors.teal), // Updated to use colorScheme
+              scaffoldBackgroundColor: Colors.black,
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.teal,
+              ),
+              textTheme: const TextTheme(
+                bodyLarge: TextStyle(color: Colors.white), // Updated to bodyLarge
+                bodyMedium: TextStyle(color: Colors.white), // Updated to bodyMedium
+                headlineMedium: TextStyle(color: Colors.white), // Updated to headlineMedium
+              ),
+            )
+          : ThemeData.light().copyWith(
+              colorScheme: const ColorScheme.light(primary: Colors.teal), // Updated to use colorScheme
+              scaffoldBackgroundColor: Colors.white,
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.teal,
+              ),
+              textTheme: const TextTheme(
+                bodyLarge: TextStyle(color: Colors.black87), // Updated to bodyLarge
+                bodyMedium: TextStyle(color: Colors.black87), // Updated to bodyMedium
+                headlineMedium: TextStyle(color: Colors.black87), // Updated to headlineMedium
+              ),
+            ),
+      home: CalculatorScreen(
+        isDarkMode: _isDarkMode,
+        toggleDarkMode: _toggleDarkMode,
+      ),
+    );
+  }
+
+  void _toggleDarkMode(bool value) {
+    setState(() {
+      _isDarkMode = value;
+    });
+  }
+}
+
+class CalculatorScreen extends StatefulWidget {
+  final bool isDarkMode;
+  final ValueChanged<bool> toggleDarkMode;
+
+  const CalculatorScreen({super.key, required this.isDarkMode, required this.toggleDarkMode});
+
+  @override
+  _CalculatorScreenState createState() => _CalculatorScreenState();
+}
+
+class _CalculatorScreenState extends State<CalculatorScreen> {
+  final TextEditingController highController = TextEditingController();
+  final TextEditingController lowController = TextEditingController();
+
+  String buyAbove = "";
+  String sellBelow = "";
+  String buyAbove1 = "";
+  String buyAbove5 = "";
+  String buyAbove10 = "";
+  String sellBelow1 = "";
+  String sellBelow5 = "";
+  String sellBelow10 = "";
+
+  bool showResults = false;
+
+ void calculate() {
+  double? high = double.tryParse(highController.text);
+  double? low = double.tryParse(lowController.text);
+
+  if (high != null && low != null) {
+    // Perform calculations when both inputs are valid numbers
+    double diff = high - low;
+    double buyAboveValue = (diff / 2) + high;
+    double sellBelowValue = low - (diff / 2);
+
+    // Calculate targets
+    double buyAbove1Value = (0.01 * buyAboveValue) + buyAboveValue;
+    double buyAbove5Value = (0.05 * buyAboveValue) + buyAboveValue;
+    double buyAbove10Value = (0.10 * buyAboveValue) + buyAboveValue;
+
+    double sellBelow1Value = sellBelowValue - (0.01 * sellBelowValue);
+    double sellBelow5Value = sellBelowValue - (0.05 * sellBelowValue);
+    double sellBelow10Value = sellBelowValue - (0.10 * sellBelowValue);
+
+    setState(() {
+      buyAbove = buyAboveValue.toStringAsFixed(2);
+      sellBelow = sellBelowValue.toStringAsFixed(2);
+
+      buyAbove1 = buyAbove1Value.toStringAsFixed(2);
+      buyAbove5 = buyAbove5Value.toStringAsFixed(2);
+      buyAbove10 = buyAbove10Value.toStringAsFixed(2);
+
+      sellBelow1 = sellBelow1Value.toStringAsFixed(2);
+      sellBelow5 = sellBelow5Value.toStringAsFixed(2);
+      sellBelow10 = sellBelow10Value.toStringAsFixed(2);
+
+      showResults = true;
+    });
+  } else {
+    // If the inputs are invalid numbers, show error message
+    setState(() {
+      buyAbove = "Please enter valid numbers!";
+      sellBelow = "";
+      buyAbove1 = "";
+      buyAbove5 = "";
+      buyAbove10 = "";
+      sellBelow1 = "";
+      sellBelow5 = "";
+      sellBelow10 = "";
+      showResults = false; // You can still set showResults to false here, but the error will still show
+    });
+  }
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Trade Calculator'),
+        actions: [
+          Switch(
+            value: widget.isDarkMode,
+            onChanged: widget.toggleDarkMode,
+            activeColor: Colors.white,
+            inactiveThumbColor: Colors.teal,
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(  
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: 
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Text(
+              //   'Enter High and Low Values',
+              //   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              //   textAlign: TextAlign.center,
+              // ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(child: _buildInputField("High Value", highController)),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildInputField("Low Value", lowController)),
+                ],
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: calculate,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  backgroundColor: Colors.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Calculate",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 24),
+              if (buyAbove == "Please enter valid numbers!") ...[
+  Container(
+        
+    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+    decoration: BoxDecoration(
+      color: Colors.redAccent,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      children: [
+        Text(
+          buyAbove,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+      ],
+    ),
+  ),
+] else if (showResults) ...[
+                // Directly showing results without the green background container
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildResultBox("Buy Above:", buyAbove),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildResultBox("Sell Below:", sellBelow),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Divider(),
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        "Target Values",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          // Left column with Buy Above values
+                          Expanded(
+                            child: Column(
+                              children: [
+                                const Text("Buy Above", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 6),
+                                _buildTargetValueBox("1%", buyAbove1),
+                                 const SizedBox(height: 6),
+                                _buildTargetValueBox("5%", buyAbove5),
+                                 const SizedBox(height: 6),
+                                _buildTargetValueBox("10%", buyAbove10),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          // Right column with Sell Below values
+                          Expanded(
+                            child: Column(
+                              children: [
+                                const Text("Sell Below", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 6),
+                                _buildTargetValueBox("1%", sellBelow1),
+                                 const SizedBox(height: 6),
+                                _buildTargetValueBox("5%", sellBelow5),
+                                 const SizedBox(height: 6),
+                                _buildTargetValueBox("10%", sellBelow10),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField(String label, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(fontSize: 18, color: Colors.teal),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.teal, width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+    );
+  }
+
+  Widget _buildResultBox(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: widget.isDarkMode ? Colors.grey[700] : Colors.grey[300],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTargetValueBox(String percentage, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: widget.isDarkMode ? Colors.grey[700] : Colors.grey[300],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Text(
+            "$percentage Target",
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+}
