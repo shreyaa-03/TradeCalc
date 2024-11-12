@@ -74,6 +74,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextEditingController highController = TextEditingController();
   final TextEditingController lowController = TextEditingController();
 
+ FocusNode lowFocusNode = FocusNode();
+
   String buyAbove = "";
   String sellBelow = "";
   String buyAbove1 = "";
@@ -177,7 +179,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  Expanded(child: _buildInputField("High Value", highController)),
+                  Expanded(child: _buildInputField("High Value", highController, nextFocus: lowFocusNode)),
                   const SizedBox(width: 16),
                   Expanded(child: _buildInputField("Low Value", lowController)),
                 ],
@@ -270,24 +272,33 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(fontSize: 18, color: Colors.teal),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.teal, width: 2),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+Widget _buildInputField(String label, TextEditingController controller, {FocusNode? nextFocus}) {
+  return TextField(
+    controller: controller,
+    keyboardType: TextInputType.number,
+    textInputAction: nextFocus != null ? TextInputAction.next : TextInputAction.done,  // Show 'next' action for the first field
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(fontSize: 18, color: Colors.teal),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.teal, width: 2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    ),
+    focusNode: label == "Low Value" ? lowFocusNode : null,  // Assign the focus node to Low Value only
+    onSubmitted: (value) {
+      if (nextFocus != null) {
+        FocusScope.of(context).requestFocus(nextFocus); // Move to the next input field
+      } else {
+        FocusScope.of(context).unfocus(); // Hide keyboard after the last field
+      }
+    },
+  );
+}
 
 Widget _buildResultBox(String label, String value) {
   return Container(
